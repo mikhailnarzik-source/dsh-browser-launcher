@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Agent browser launcher",
+    "description": "A card on the right panel's Start page that launches Chrome with the agent profile and debug port the assistant connects to. Sign-ins live on disk and survive restarts.",
+    "detail": "docs/DETAIL.md"
+  }
+}

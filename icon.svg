@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Agent browser">
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="#1b2430"/>
+  <circle cx="28" cy="32" r="16" fill="none" stroke="#5aa9f0" stroke-width="2.6"/>
+  <ellipse cx="28" cy="32" rx="6.8" ry="16" fill="none" stroke="#5aa9f0" stroke-width="2.2"/>
+  <path d="M12.5 32h31" fill="none" stroke="#5aa9f0" stroke-width="2.2"/>
+  <path d="M40 25.6 55 32l-15 6.4z" fill="#f2f6fa"/>
+  <path d="M40 25.6 55 32l-15 6.4z" fill="none" stroke="#1b2430" stroke-width="1.2"/>
+</svg>
