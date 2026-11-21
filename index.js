@@ -8,6 +8,7 @@
  */
 import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
+import { mkdir, writeFile } from 'node:fs/promises'
 import { connect } from 'node:net'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
@@ -88,7 +89,9 @@ function launch(chromePath, dir, port) {
   ]
   const child = spawn(chromePath, args, { detached: true, stdio: 'ignore', windowsHide: false })
   child.unref()
-  return child.pid ?? null
+  const pid = child.pid ?? null
+  void appendLog('start', true, pid === null ? 'Chrome запущен' : `Chrome запущен, pid ${pid}`)
+  return pid
 }
 
 /** JSON-ответ для маршрута. */
@@ -97,6 +100,20 @@ function json(payload, status = 200) {
     status,
     headers: { 'content-type': 'application/json; charset=utf-8' },
   })
+}
+
+
+/** Записать событие в общий журнал плагина. */
+async function appendLog(kind, ok, message) {
+  try {
+    const home = process.env.DSH_HOME
+    const base = typeof home === 'string' && home !== '' ? home : join(homedir(), '.dsh')
+    const dir = join(base, 'dsh-browser-launcher')
+    await mkdir(dir, { recursive: true })
+    await writeFile(join(dir, 'log.jsonl'), JSON.stringify({ at: new Date().toISOString(), plugin: 'dsh-browser-launcher', kind, ok, text: message }) + '\n', { encoding: 'utf8', flag: 'a' })
+  } catch {
+    // журнал необязателен
+  }
 }
 
 export function apply(ctx) {

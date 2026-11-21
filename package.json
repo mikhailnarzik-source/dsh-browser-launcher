@@ -1,6 +1,6 @@
 {
   "name": "dsh-browser-launcher",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "description": "Кнопка «Запустить браузер» на стартовой странице правой панели DSH: поднимает Chrome с профилем агента и портом отладки.",
   "license": "MIT",
