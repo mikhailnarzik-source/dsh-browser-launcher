@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Agent browser launcher",
-    "description": "A card on the right panel's Start page that launches Chrome with the agent profile and debug port the assistant connects to. Sign-ins live on disk and survive restarts.",
+    "description": "A card on the right panel's Start page: one click opens Chrome with its own agent profile and a debug port the assistant connects to. Website sign-ins stay in that profile and survive restarts. The plugin only launches the browser and never stores passwords.",
     "detail": "docs/DETAIL.md"
   }
 }
