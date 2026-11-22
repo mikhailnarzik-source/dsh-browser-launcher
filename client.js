@@ -33,6 +33,12 @@ window.__ModuleLoader__.load({
       portLabel: 'Debug port',
       pageHint: 'The window is an ordinary Chrome with its own profile. Sign-ins live on disk, so they survive restarts of both Chrome and DSH. Closing the window only removes the assistant’s access, not the sessions.',
       refresh: 'Check again',
+      checking: 'Checking…',
+      launchSection: 'Launch',
+      profileSection: 'Profile and port',
+      hintSection: 'How it works',
+      launchHint: 'One click starts Chrome with the agent profile and the debug port. The assistant connects to that window.',
+      emptyValue: 'not available yet',
     }
 
     const ru = {
@@ -50,6 +56,12 @@ window.__ModuleLoader__.load({
       portLabel: 'Порт отладки',
       pageHint: 'Это обычный Chrome со своим профилем. Входы хранятся на диске и переживают перезапуск и Chrome, и DSH. Закрытие окна отнимает у ассистента доступ, но не сессии.',
       refresh: 'Проверить снова',
+      checking: 'Проверяю…',
+      launchSection: 'Запуск',
+      profileSection: 'Профиль и порт',
+      hintSection: 'Как это работает',
+      launchHint: 'Один клик поднимает Chrome с профилем агента и портом отладки — ассистент подключается к этому окну.',
+      emptyValue: 'пока нет данных',
     }
 
     let translate = key => key
@@ -76,6 +88,11 @@ window.__ModuleLoader__.load({
         h('path', { d: 'M15.5 9.4 21.4 12l-5.9 2.6z', fill: 'currentColor' }),
       )
     }
+
+    /** Горизонтальная полоса-разделитель внутри карточки. */
+    const DIVIDER = { height: 1, background: 'var(--dsw-alias-border-l1)' }
+
+    const ACCENT = 'var(--dsw-alias-brand-primary)'
 
     const S = {
       card: {
@@ -123,22 +140,132 @@ window.__ModuleLoader__.load({
       },
       chip: { flex: 'none', fontSize: 11, lineHeight: 1.4, color: 'var(--dsw-alias-label-tertiary)' },
       dot: (color) => ({ width: 6, height: 6, borderRadius: 999, background: color, display: 'inline-block', marginRight: 6 }),
-      page: { display: 'flex', flexDirection: 'column', gap: 14, padding: '18px 20px', color: 'inherit' },
-      pageTitle: { fontSize: 15, color: 'var(--dsw-alias-label-primary)' },
-      pageText: { fontSize: 12, lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary)' },
-      primary: {
-        alignSelf: 'flex-start',
-        padding: '8px 16px',
-        borderRadius: 999,
-        border: '0.5px solid var(--dsw-alias-border-l3)',
-        background: 'var(--dsw-alias-bg-layer-1)',
+
+      /* --- Страница плагина: единый стиль -------------------------------- */
+      page: {
+        width: '100%',
+        maxWidth: 960,
+        margin: '0 auto',
+        padding: '24px 28px 40px',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
         color: 'inherit',
+      },
+      header: { display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' },
+      logo: {
+        flex: 'none',
+        width: 52,
+        height: 52,
+        borderRadius: 14,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: ACCENT,
+        background:
+          'linear-gradient(135deg, color-mix(in srgb, var(--dsw-alias-brand-primary) 24%, transparent), color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent))',
+        border: '1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 22%, transparent)',
+      },
+      titles: { display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0, flex: '1 1 220px' },
+      heading: { margin: 0, fontSize: 20, fontWeight: 600, lineHeight: 1.25, color: 'var(--dsw-alias-label-primary)' },
+      subtitle: {
+        margin: 0,
+        fontSize: 12.5,
+        lineHeight: 1.45,
+        color: 'var(--dsw-alias-label-secondary)',
+        maxWidth: '64ch',
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+      },
+      actions: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+      chipStatus: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '3px 9px',
+        borderRadius: 999,
+        fontSize: 12,
+        lineHeight: 1.4,
+        color: 'var(--dsw-alias-label-secondary)',
+        background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, transparent)',
+        whiteSpace: 'nowrap',
+      },
+      refresh: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        height: 32,
+        padding: '0 12px',
+        borderRadius: 9,
+        border: '1px solid var(--dsw-alias-border-l4)',
+        background: 'transparent',
+        color: 'var(--dsw-alias-label-primary)',
         font: 'inherit',
-        fontSize: 13,
+        fontSize: 12.5,
+        fontWeight: 600,
         cursor: 'pointer',
       },
-      meta: { fontSize: 11, lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary)', wordBreak: 'break-all' },
+      grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 },
+      section: {
+        background: 'var(--dsw-alias-bg-layer-1)',
+        border: '1px solid var(--dsw-alias-border-l2)',
+        borderRadius: 14,
+        padding: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        minWidth: 0,
+      },
+      sectionTitle: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        fontSize: 14,
+        fontWeight: 600,
+        color: 'var(--dsw-alias-label-primary)',
+      },
+      stripe: { flex: 'none', width: 3, height: 14, borderRadius: 2, background: ACCENT },
+      statusText: { margin: 0, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dsw-alias-label-secondary)' },
+      hint: { margin: 0, fontSize: 12, lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary)' },
+      row: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+      primary: {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        height: 36,
+        padding: '0 16px',
+        borderRadius: 10,
+        border: '1px solid var(--dsw-alias-brand-primary)',
+        background: 'var(--dsw-alias-brand-primary)',
+        color: 'var(--dsw-alias-bg-base)',
+        font: 'inherit',
+        fontSize: 12.5,
+        fontWeight: 600,
+        cursor: 'pointer',
+      },
+      field: { display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 },
+      fieldLabel: { fontSize: 11, lineHeight: 1.4, letterSpacing: '0.02em', color: 'var(--dsw-alias-label-tertiary)' },
+      fieldValue: {
+        fontSize: 12.5,
+        lineHeight: 1.5,
+        color: 'var(--dsw-alias-label-primary)',
+        wordBreak: 'break-all',
+        fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+      },
+      error: { margin: 0, fontSize: 12, lineHeight: 1.5, color: 'var(--dsw-alias-state-error-primary)' },
     }
+
+    /** Адаптив: на узком экране отступы меньше, шапка складывается в колонку. */
+    const PAGE_CSS =
+      '@media (max-width: 760px){' +
+      '[data-dsh-bl-page]{padding:18px 16px 32px !important}' +
+      '[data-dsh-bl-header]{align-items:flex-start}' +
+      '[data-dsh-bl-actions]{margin-left:0 !important;width:100%}' +
+      '}'
 
     /** Состояние запуска, общее для карточки и страницы. */
     function useLauncher() {
@@ -189,9 +316,9 @@ window.__ModuleLoader__.load({
     }
 
     function phaseColor(phase) {
-      if (phase === 'running') return '#2f9e44'
-      if (phase === 'starting') return '#e0a100'
-      if (phase === 'failed') return '#d1242f'
+      if (phase === 'running') return 'var(--dsw-alias-state-success-primary)'
+      if (phase === 'starting') return 'var(--dsw-alias-state-warn-primary)'
+      if (phase === 'failed') return 'var(--dsw-alias-state-error-primary)'
       return 'var(--dsw-alias-label-tertiary)'
     }
 
@@ -233,52 +360,136 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /** Страница типа: статус, кнопка и подсказки. */
+    /** Одна строка «подпись — значение» в карточке профиля. */
+    function Field(props) {
+      return h(
+        'div',
+        { style: S.field },
+        h('span', { style: S.fieldLabel }, props.label),
+        h('span', { style: S.fieldValue }, props.value),
+      )
+    }
+
+    /** Страница типа: статус, кнопка, профиль, порт и подсказка. */
     function LauncherPage() {
       const t = (key) => translate(key)
       const { phase, status, message, launch, readStatus } = useLauncher()
       const busy = phase === 'starting'
+      const profileValue =
+        status?.profileDir === undefined || status?.profileDir === '' ? t('emptyValue') : String(status.profileDir)
+      const portValue = status?.port === undefined || status?.port === null ? t('emptyValue') : String(status.port)
 
       return h(
         'div',
-        { style: S.page },
-        h('div', { style: S.pageTitle }, phase === 'running' ? t('statusRunning') : t('statusStopped')),
+        { style: S.page, 'data-dsh-bl-page': 'page' },
+        h('style', null, PAGE_CSS),
         h(
           'div',
-          { style: { display: 'flex', gap: 10, alignItems: 'center' } },
+          { style: S.header, 'data-dsh-bl-header': 'header' },
+          h('div', { style: S.logo }, h(Icon, { size: 26 })),
           h(
-            'button',
-            {
-              type: 'button',
-              style: S.primary,
-              disabled: busy,
-              onClick: () => {
-                void launch()
-              },
-            },
-            busy ? t('starting') : t('launchAction'),
+            'div',
+            { style: S.titles },
+            h('h1', { style: S.heading }, t('type.label')),
+            h('p', { style: S.subtitle }, t('description')),
           ),
           h(
-            'button',
-            {
-              type: 'button',
-              style: S.primary,
-              onClick: () => {
-                void readStatus()
+            'div',
+            { style: S.actions, 'data-dsh-bl-actions': 'actions' },
+            h(
+              'span',
+              { style: S.chipStatus, 'data-dsh-bl-chip': 'status' },
+              h('span', { style: S.dot(phaseColor(phase)) }),
+              phaseLabel(phase, t),
+            ),
+            h(
+              'button',
+              {
+                type: 'button',
+                style: S.refresh,
+                disabled: busy,
+                title: t('refresh'),
+                'aria-label': t('refresh'),
+                onClick: () => {
+                  void readStatus()
+                },
               },
-            },
-            t('refresh'),
+              h('span', { 'aria-hidden': true, style: { fontSize: 14, lineHeight: 1 } }, '↻'),
+              h('span', null, busy ? t('checking') : t('refresh')),
+            ),
           ),
         ),
         h(
           'div',
-          { style: S.meta },
-          status?.profileDir === undefined ? null : h('div', null, `${t('profileLabel')}: ${status.profileDir}`),
-          status?.port === undefined ? null : h('div', null, `${t('portLabel')}: ${status.port}`),
-          message === '' ? null : h('div', { style: { color: '#d1242f' } }, message),
+          { style: S.grid, 'data-dsh-bl-grid': 'grid' },
+          h(
+            'section',
+            { style: S.section, 'data-dsh-bl-card': 'launch' },
+            h('div', { style: S.sectionTitle }, h('span', { style: S.stripe }), t('launchSection')),
+            h('p', { style: S.statusText }, phase === 'running' ? t('statusRunning') : t('statusStopped')),
+            h('p', { style: S.hint }, t('launchHint')),
+            message === '' ? null : h('p', { style: S.error }, message),
+            h(
+              'div',
+              { style: S.row },
+              h(
+                'button',
+                {
+                  type: 'button',
+                  style: S.primary,
+                  disabled: busy,
+                  onClick: () => {
+                    void launch()
+                  },
+                },
+                busy ? t('starting') : t('launchAction'),
+              ),
+            ),
+          ),
+          h(
+            'section',
+            { style: S.section, 'data-dsh-bl-card': 'profile' },
+            h('div', { style: S.sectionTitle }, h('span', { style: S.stripe }), t('profileSection')),
+            h('div', { style: DIVIDER }),
+            h(Field, { label: t('profileLabel'), value: profileValue }),
+            h(Field, { label: t('portLabel'), value: portValue }),
+          ),
         ),
-        h('div', { style: S.pageText }, t('pageHint')),
+        h(
+          'section',
+          { style: S.section, 'data-dsh-bl-card': 'hint' },
+          h('div', { style: S.sectionTitle }, h('span', { style: S.stripe }), t('hintSection')),
+          h('p', { style: S.hint }, t('pageHint')),
+        ),
       )
+    }
+
+    /** Компактная карточка для сводного режима страницы плагина. */
+    function LauncherSummary() {
+      const t = (key) => translate(key)
+      return h(
+        'div',
+        { style: S.section, 'data-dsh-bl-card': 'summary' },
+        h(
+          'div',
+          { style: S.row },
+          h('span', { style: { ...S.logo, width: 34, height: 34, borderRadius: 11 } }, h(Icon, { size: 18 })),
+          h(
+            'div',
+            { style: S.titles },
+            h('span', { style: S.sectionTitle }, t('type.label')),
+            h('span', { style: S.hint }, t('description')),
+          ),
+        ),
+        h('p', { style: S.hint }, t('pageHint')),
+      )
+    }
+
+    /** Имя пакета из subject страницы плагина: bundle или одиночный плагин. */
+    function packageNameOf(props) {
+      const subject = props?.subject
+      if (subject?.kind === 'bundle' && typeof subject?.pkg?.name === 'string') return subject.pkg.name
+      return typeof subject?.id === 'string' ? subject.id : ''
     }
 
     function apply(ctx) {
@@ -324,6 +535,22 @@ window.__ModuleLoader__.load({
         }, LauncherPage)), 'dsh-browser-launcher.page')
       } catch (error) {
         console.error('[dsh-browser-launcher] страница недоступна:', error)
+      }
+
+      // Страница плагина в «Плагинах»: тот же экран запуска в едином стиле.
+      try {
+        ctx.effect(() => ctx.slots.inject('plugins.detail.section', () => ctx.slots.register({
+          name: 'plugins.detail.section',
+          id: 'dsh-browser-launcher-detail',
+          order: 44,
+          locale: NS,
+        }, (props) => {
+          if (packageNameOf(props) !== 'dsh-browser-launcher') return null
+          if (props?.view === 'summary') return h(LauncherSummary, props)
+          return h(LauncherPage, props)
+        })), 'dsh-browser-launcher.detail')
+      } catch (error) {
+        console.error('[dsh-browser-launcher] секция страницы недоступна:', error)
       }
     }
 
