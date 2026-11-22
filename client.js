@@ -194,21 +194,26 @@ window.__ModuleLoader__.load({
         whiteSpace: 'nowrap',
       },
       refresh: {
+        boxSizing: 'border-box',
         display: 'inline-flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 6,
         height: 32,
-        padding: '0 12px',
-        borderRadius: 9,
+        padding: '0 14px',
+        borderRadius: 10,
         border: '1px solid var(--dsw-alias-border-l4)',
         background: 'transparent',
         color: 'var(--dsw-alias-label-primary)',
         font: 'inherit',
         fontSize: 12.5,
         fontWeight: 600,
+        lineHeight: 1.4,
+        whiteSpace: 'nowrap',
         cursor: 'pointer',
+        transition: 'background-color .12s ease,border-color .12s ease,color .12s ease',
       },
-      grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 },
+      grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 16, alignItems: 'stretch' },
       section: {
         background: 'var(--dsw-alias-bg-layer-1)',
         border: '1px solid var(--dsw-alias-border-l2)',
@@ -230,22 +235,27 @@ window.__ModuleLoader__.load({
       stripe: { flex: 'none', width: 3, height: 14, borderRadius: 2, background: ACCENT },
       statusText: { margin: 0, fontSize: 12.5, lineHeight: 1.5, color: 'var(--dsw-alias-label-secondary)' },
       hint: { margin: 0, fontSize: 12, lineHeight: 1.5, color: 'var(--dsw-alias-label-tertiary)' },
-      row: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
+      row: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0 },
+      rowFoot: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', minWidth: 0, marginTop: 'auto' },
       primary: {
+        boxSizing: 'border-box',
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,
         height: 36,
-        padding: '0 16px',
+        padding: '0 14px',
         borderRadius: 10,
-        border: '1px solid var(--dsw-alias-brand-primary)',
-        background: 'var(--dsw-alias-brand-primary)',
-        color: 'var(--dsw-alias-bg-base)',
+        border: '1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent)',
+        background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 18%, transparent)',
+        color: 'var(--dsw-alias-brand-primary)',
         font: 'inherit',
         fontSize: 12.5,
         fontWeight: 600,
+        lineHeight: '20px',
+        whiteSpace: 'nowrap',
         cursor: 'pointer',
+        transition: 'background-color .12s ease,border-color .12s ease,color .12s ease',
       },
       field: { display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 },
       fieldLabel: { fontSize: 11, lineHeight: 1.4, letterSpacing: '0.02em', color: 'var(--dsw-alias-label-tertiary)' },
@@ -259,12 +269,21 @@ window.__ModuleLoader__.load({
       error: { margin: 0, fontSize: 12, lineHeight: 1.5, color: 'var(--dsw-alias-state-error-primary)' },
     }
 
-    /** Адаптив: на узком экране отступы меньше, шапка складывается в колонку. */
+    /** Адаптив и hover кнопок: то, что не выразить inline-стилями. */
     const PAGE_CSS =
-      '@media (max-width: 760px){' +
+      '[data-dsh-bl-primary]:hover:not(:disabled){background:color-mix(in srgb, var(--dsw-alias-brand-primary) 28%, transparent) !important}' +
+      '[data-dsh-bl-refresh]:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover) !important}' +
+      '[data-dsh-bl-primary]:focus-visible,[data-dsh-bl-refresh]:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}' +
+      '[data-dsh-bl-primary]:disabled,[data-dsh-bl-refresh]:disabled{opacity:0.55;cursor:default}' +
+      '@media (max-width: 900px){' +
+      '[data-dsh-bl-page]{padding:20px 20px 36px !important}' +
+      '[data-dsh-bl-grid]{grid-template-columns:1fr !important}' +
+      '}' +
+      '@media (max-width: 640px){' +
       '[data-dsh-bl-page]{padding:18px 16px 32px !important}' +
       '[data-dsh-bl-header]{align-items:flex-start}' +
       '[data-dsh-bl-actions]{margin-left:0 !important;width:100%}' +
+      '[data-dsh-bl-primary],[data-dsh-bl-refresh]{max-width:100%}' +
       '}'
 
     /** Состояние запуска, общее для карточки и страницы. */
@@ -407,6 +426,7 @@ window.__ModuleLoader__.load({
               {
                 type: 'button',
                 style: S.refresh,
+                'data-dsh-bl-refresh': 'refresh',
                 disabled: busy,
                 title: t('refresh'),
                 'aria-label': t('refresh'),
@@ -431,12 +451,13 @@ window.__ModuleLoader__.load({
             message === '' ? null : h('p', { style: S.error }, message),
             h(
               'div',
-              { style: S.row },
+              { style: S.rowFoot },
               h(
                 'button',
                 {
                   type: 'button',
                   style: S.primary,
+                  'data-dsh-bl-primary': 'launch',
                   disabled: busy,
                   onClick: () => {
                     void launch()

@@ -194,15 +194,45 @@ if (primaryButtons.length !== 1) {
   console.error('FAIL: primary-кнопка запуска не найдена')
   process.exit(1)
 }
+const primaryStyle = primaryButtons[0].props.style
+if (!/brand-primary\) 18%/.test(String(primaryStyle.background))) {
+  console.error('FAIL: primary-кнопка не мягкая brand-заливка 18%')
+  process.exit(1)
+}
+if (!/brand-primary/.test(String(primaryStyle.color)) || /#fff/i.test(JSON.stringify(primaryStyle))) {
+  console.error('FAIL: primary-кнопка не brand-текст или использует белый')
+  process.exit(1)
+}
+if (primaryStyle.padding !== '0 14px' || primaryStyle.borderRadius !== 10 || primaryStyle.whiteSpace !== 'nowrap') {
+  console.error('FAIL: primary-кнопка не по единому размеру')
+  process.exit(1)
+}
+if (refreshButtons[0].props?.style?.padding !== '0 14px' || refreshButtons[0].props?.style?.borderRadius !== 10) {
+  console.error('FAIL: кнопка в шапке не по единому размеру')
+  process.exit(1)
+}
 
 const styleTags = findAll(pageTree, (node) => node.type === 'style')
 const css = styleTags.map((node) => node.children?.join('') ?? '').join('\n')
-if (!css.includes('max-width: 760px')) {
-  console.error('FAIL: адаптив страницы (media query) не найден')
+if (!css.includes('max-width: 900px') || !css.includes('max-width: 640px')) {
+  console.error('FAIL: адаптив страницы (media 900/640) не найден')
   process.exit(1)
 }
-if (!css.includes('data-dsh-bl-page')) {
-  console.error('FAIL: media query не привязана к странице')
+if (!css.includes('data-dsh-bl-page') || !css.includes('data-dsh-bl-grid')) {
+  console.error('FAIL: media query не привязана к странице и сетке')
+  process.exit(1)
+}
+if (!css.includes('[data-dsh-bl-primary]:hover') || !css.includes('max-width:100%')) {
+  console.error('FAIL: hover основной кнопки или ограничение ширины не найдены')
+  process.exit(1)
+}
+const grid = findAll(pageTree, (node) => node.props?.['data-dsh-bl-grid'] === 'grid')[0]
+if (!String(grid?.props?.style?.gridTemplateColumns ?? '').includes('min(100%, 280px)')) {
+  console.error('FAIL: сетка карточек не адаптивная')
+  process.exit(1)
+}
+if (grid?.props?.style?.alignItems !== 'stretch') {
+  console.error('FAIL: карточки ряда не растянуты на одну высоту')
   process.exit(1)
 }
 
