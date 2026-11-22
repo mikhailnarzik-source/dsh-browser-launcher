@@ -17,6 +17,13 @@ window.__ModuleLoader__.load({
     const KIND = 'browser-launcher'
     const START_PATH = '/api/dsh-browser-launcher/start'
     const STATUS_PATH = '/api/dsh-browser-launcher/status'
+    // Своя панель в левой панели: ключ main и id строки обязаны совпадать.
+    const PANEL_ID = 'plugin-browser'
+    const PANEL_PLUGIN_ID = 'browser'
+    const PANEL_ORDER = 30
+    const PANEL_EMOJI = '🌐'
+    const PANEL_STATE_KEY = 'dsh-polish:panel-visibility'
+    const PANELS_CHANGED_EVENT = 'dsh-polish:panels-changed'
 
     const en = {
       'type.label': 'Agent browser',
@@ -389,56 +396,17 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /** Страница типа: статус, кнопка, профиль, порт и подсказка. */
-    function LauncherPage() {
-      const t = (key) => translate(key)
-      const { phase, status, message, launch, readStatus } = useLauncher()
+    /**
+     * Настройки запуска: карточки статуса, профиля и подсказки. Один набор для
+     * страницы плагина (plugins.detail.section) и для своей main-панели.
+     */
+    function launchSettings(t, launcher) {
+      const { phase, status, message, launch } = launcher
       const busy = phase === 'starting'
       const profileValue =
         status?.profileDir === undefined || status?.profileDir === '' ? t('emptyValue') : String(status.profileDir)
       const portValue = status?.port === undefined || status?.port === null ? t('emptyValue') : String(status.port)
-
-      return h(
-        'div',
-        { style: S.page, 'data-dsh-bl-page': 'page' },
-        h('style', null, PAGE_CSS),
-        h(
-          'div',
-          { style: S.header, 'data-dsh-bl-header': 'header' },
-          h('div', { style: S.logo }, h(Icon, { size: 26 })),
-          h(
-            'div',
-            { style: S.titles },
-            h('h1', { style: S.heading }, t('type.label')),
-            h('p', { style: S.subtitle }, t('description')),
-          ),
-          h(
-            'div',
-            { style: S.actions, 'data-dsh-bl-actions': 'actions' },
-            h(
-              'span',
-              { style: S.chipStatus, 'data-dsh-bl-chip': 'status' },
-              h('span', { style: S.dot(phaseColor(phase)) }),
-              phaseLabel(phase, t),
-            ),
-            h(
-              'button',
-              {
-                type: 'button',
-                style: S.refresh,
-                'data-dsh-bl-refresh': 'refresh',
-                disabled: busy,
-                title: t('refresh'),
-                'aria-label': t('refresh'),
-                onClick: () => {
-                  void readStatus()
-                },
-              },
-              h('span', { 'aria-hidden': true, style: { fontSize: 14, lineHeight: 1 } }, '↻'),
-              h('span', null, busy ? t('checking') : t('refresh')),
-            ),
-          ),
-        ),
+      return [
         h(
           'div',
           { style: S.grid, 'data-dsh-bl-grid': 'grid' },
@@ -481,6 +449,134 @@ window.__ModuleLoader__.load({
           { style: S.section, 'data-dsh-bl-card': 'hint' },
           h('div', { style: S.sectionTitle }, h('span', { style: S.stripe }), t('hintSection')),
           h('p', { style: S.hint }, t('pageHint')),
+        ),
+      ]
+    }
+
+    /** Страница типа: статус, кнопка, профиль, порт и подсказка. */
+    function LauncherPage() {
+      const t = (key) => translate(key)
+      const launcher = useLauncher()
+      const { phase, readStatus } = launcher
+      const busy = phase === 'starting'
+
+      return h(
+        'div',
+        { style: S.page, 'data-dsh-bl-page': 'page' },
+        h('style', null, PAGE_CSS),
+        h(
+          'div',
+          { style: S.header, 'data-dsh-bl-header': 'header' },
+          h('div', { style: S.logo }, h(Icon, { size: 26 })),
+          h(
+            'div',
+            { style: S.titles },
+            h('h1', { style: S.heading }, t('type.label')),
+            h('p', { style: S.subtitle }, t('description')),
+          ),
+          h(
+            'div',
+            { style: S.actions, 'data-dsh-bl-actions': 'actions' },
+            h(
+              'span',
+              { style: S.chipStatus, 'data-dsh-bl-chip': 'status' },
+              h('span', { style: S.dot(phaseColor(phase)) }),
+              phaseLabel(phase, t),
+            ),
+            h(
+              'button',
+              {
+                type: 'button',
+                style: S.refresh,
+                'data-dsh-bl-refresh': 'refresh',
+                disabled: busy,
+                title: t('refresh'),
+                'aria-label': t('refresh'),
+                onClick: () => {
+                  void readStatus()
+                },
+              },
+              h('span', { 'aria-hidden': true, style: { fontSize: 14, lineHeight: 1 } }, '↻'),
+              h('span', null, busy ? t('checking') : t('refresh')),
+            ),
+          ),
+        ),
+        ...launchSettings(t, launcher),
+      )
+    }
+
+    /** Прокручиваемая область main-панели: страница со своими отступами. */
+    const PANEL_SCROLL = {
+      flex: '1 1 auto',
+      height: '100%',
+      minHeight: 0,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      boxSizing: 'border-box',
+      background: 'var(--dsw-alias-bg-base)',
+      color: 'var(--dsw-alias-label-primary)',
+    }
+
+    /** Адаптив и верхний отступ main-панели (шапка окна на macOS). */
+    const PANEL_CSS =
+      'html[data-platform="darwin"] [data-dsh-bl-panel-page]{padding-top:calc(24px + var(--dsh-frame-top-clearance,0px)) !important}' +
+      '@media (max-width: 900px){[data-dsh-bl-panel-page]{padding:20px 20px 36px !important}}' +
+      '@media (max-width: 640px){[data-dsh-bl-panel-page]{padding:18px 16px 32px !important}}'
+
+    /** Эмодзи-иконка строки левой панели: размер задаёт сама панель. */
+    function PanelIcon(props) {
+      const requested = Number(props?.size)
+      const size = Number.isFinite(requested) && requested > 0 ? requested : 16
+      return h(
+        'span',
+        {
+          'data-dsh-bl-icon': 'sidebar',
+          'aria-hidden': true,
+          style: {
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: size,
+            height: size,
+            fontSize: Math.round(size * 0.95),
+            lineHeight: 1,
+          },
+        },
+        PANEL_EMOJI,
+      )
+    }
+
+    /**
+     * Своя main-панель: центрированная страница с эмодзи-шапкой и теми же
+     * настройками запуска. Никаких блоков «Описание / Источник / Версия» —
+     * клик в левой панели открывает только элементы управления плагина.
+     */
+    function PluginPanelPage() {
+      const t = (key) => translate(key)
+      const launcher = useLauncher()
+      return h(
+        'div',
+        { style: PANEL_SCROLL, 'data-dsh-bl-panel': 'panel' },
+        h('style', null, PAGE_CSS + PANEL_CSS),
+        h(
+          'div',
+          { style: S.page, 'data-dsh-bl-panel-page': 'page' },
+          h(
+            'div',
+            { style: S.header, 'data-dsh-bl-panel-header': 'header' },
+            h(
+              'div',
+              { style: { ...S.logo, fontSize: 26, lineHeight: 1 }, 'aria-hidden': true },
+              PANEL_EMOJI,
+            ),
+            h(
+              'div',
+              { style: S.titles },
+              h('h1', { style: S.heading }, t('type.label')),
+              h('p', { style: S.subtitle }, t('description')),
+            ),
+          ),
+          ...launchSettings(t, launcher),
         ),
       )
     }
@@ -572,6 +668,92 @@ window.__ModuleLoader__.load({
         })), 'dsh-browser-launcher.detail')
       } catch (error) {
         console.error('[dsh-browser-launcher] секция страницы недоступна:', error)
+      }
+
+      /* --- Своя панель в левой панели: только настройки, без «Плагинов» --- */
+      /** Закреплена ли панель: состояние ведёт dsh-polish в localStorage. */
+      function readPanelPinned() {
+        try {
+          const storage = typeof window !== 'undefined' ? window.localStorage : undefined
+          if (storage === null || storage === undefined || typeof storage.getItem !== 'function') return true
+          const raw = storage.getItem(PANEL_STATE_KEY)
+          if (raw === null || raw === '') return true
+          const state = JSON.parse(raw)
+          if (state === null || typeof state !== 'object' || !Array.isArray(state.pinned)) return true
+          return state.pinned.includes(PANEL_PLUGIN_ID)
+        } catch {
+          return true
+        }
+      }
+
+      /** main-панель всегда, строка левой панели — только при pinned. */
+      function setupPluginPanel() {
+        const disposers = []
+        try {
+          const dispose = ctx.slots.inject('main', () => ctx.slots.register({
+            name: 'main',
+            key: PANEL_ID,
+          }, PluginPanelPage))
+          if (typeof dispose === 'function') disposers.push(dispose)
+        } catch (error) {
+          console.error('[dsh-browser-launcher] main-панель недоступна:', error)
+        }
+        let disposeSidebar = null
+        const syncSidebar = () => {
+          const pinned = readPanelPinned()
+          if (pinned && disposeSidebar === null) {
+            try {
+              disposeSidebar = ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
+                name: 'sidebar.panellist',
+                id: PANEL_ID,
+                order: PANEL_ORDER,
+                label: () => translate('type.label'),
+                locale: NS,
+              }, PanelIcon))
+            } catch (error) {
+              console.error('[dsh-browser-launcher] строка левой панели недоступна:', error)
+            }
+          } else if (!pinned && disposeSidebar !== null) {
+            const dispose = disposeSidebar
+            disposeSidebar = null
+            try { dispose() } catch (error) { console.error('[dsh-browser-launcher] не удалось снять строку левой панели:', error) }
+          }
+        }
+        syncSidebar()
+        const onPanelsChanged = () => syncSidebar()
+        // Запасной канал: изменение localStorage в другой вкладке.
+        const onStorage = (event) => {
+          if (event?.key === undefined || event.key === null || event.key === PANEL_STATE_KEY) syncSidebar()
+        }
+        try {
+          if (typeof window.addEventListener === 'function') {
+            window.addEventListener(PANELS_CHANGED_EVENT, onPanelsChanged)
+            window.addEventListener('storage', onStorage)
+          }
+        } catch {
+          // нет window в офлайн-проверках — панель работает без событий
+        }
+        return () => {
+          try {
+            window.removeEventListener(PANELS_CHANGED_EVENT, onPanelsChanged)
+            window.removeEventListener('storage', onStorage)
+          } catch {
+            // окно уже недоступно
+          }
+          if (disposeSidebar !== null) {
+            const dispose = disposeSidebar
+            disposeSidebar = null
+            try { dispose() } catch { /* плагин уже выгружен */ }
+          }
+          for (const dispose of disposers.reverse()) {
+            try { dispose() } catch { /* плагин уже выгружен */ }
+          }
+        }
+      }
+      try {
+        ctx.effect(() => setupPluginPanel(), 'dsh-browser-launcher.left-panel')
+      } catch (error) {
+        console.error('[dsh-browser-launcher] панель в левой панели недоступна:', error)
       }
     }
 
