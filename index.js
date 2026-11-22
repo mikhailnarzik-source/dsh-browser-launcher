@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Host-часть `dsh-browser-launcher`.
  *
  * Поднимает агентский Chrome — обычный процесс со своим каталогом профиля и
@@ -27,6 +27,7 @@ const CHROME_CANDIDATES = [
 const PORT = 9222
 const HOME_PAGE = 'https://www.google.com/'
 const START_TIMEOUT_MS = 30000
+const PORTS = [9222, 9223, 9224, 9225]
 const POLL_INTERVAL_MS = 400
 
 /** Путь к Chrome: первый существующий кандидат. */
@@ -60,6 +61,44 @@ function probe(port) {
     socket.once('timeout', () => finish(false))
     socket.once('error', () => finish(false))
   })
+}
+
+/** Пользовательские агенты DSH/Electron — это не агентский Chrome. */
+export function isAgentBrowserVersion(payload) {
+  if (payload === null || typeof payload !== 'object') return false
+  const browser = typeof payload.Browser === 'string' ? payload.Browser : ''
+  const userAgent = typeof payload['User-Agent'] === 'string' ? payload['User-Agent'] : ''
+  if (!browser.startsWith('Chrome/')) return false
+  return !/Electron|dsh-desktop/i.test(userAgent)
+}
+
+/** Проверить, что на порту именно агентский Chrome (а не DSH/Electron). */
+async function probeChrome(port) {
+  if (!(await probe(port))) return false
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(900) })
+    if (!response.ok) return false
+    const payload = await response.json()
+    return isAgentBrowserVersion(payload)
+  } catch {
+    return false
+  }
+}
+
+/** Найти порт, на котором уже работает агентский Chrome. */
+async function findChromePort() {
+  for (const port of PORTS) {
+    if (await probeChrome(port)) return port
+  }
+  return null
+}
+
+/** Найти свободный порт из списка (не занятый ничем). */
+async function findFreePort() {
+  for (const port of PORTS) {
+    if (!(await probe(port))) return port
+  }
+  return null
 }
 
 /** Дождаться, пока Chrome откроет порт отладки. */
@@ -125,13 +164,16 @@ export function apply(ctx) {
       path: STATUS_PATH,
       methods: ['POST'],
       requestBody: 'buffered',
-      fetch: async () => json({
-        ok: true,
-        running: await probe(PORT),
-        port: PORT,
-        profileDir: dir,
-        chromePath,
-      }),
+      fetch: async () => {
+        const chromePort = await findChromePort()
+        return json({
+          ok: true,
+          running: chromePort !== null,
+          port: chromePort ?? PORT,
+          profileDir: dir,
+          chromePath,
+        })
+      },
     })
 
     ctx.connection.fetch.register({
@@ -139,16 +181,26 @@ export function apply(ctx) {
       methods: ['POST'],
       requestBody: 'buffered',
       fetch: async () => {
-        if (await probe(PORT)) {
-          return json({ ok: true, running: true, already: true, port: PORT, profileDir: dir, chromePath })
+        const chromePort = await findChromePort()
+        if (chromePort !== null) {
+          return json({ ok: true, running: true, already: true, port: chromePort, profileDir: dir, chromePath })
         }
         if (chromePath === '') {
           return json({ ok: false, running: false, message: 'chrome.exe не найден в стандартных каталогах', chromePath })
         }
+        const freePort = await findFreePort()
+        if (freePort === null) {
+          return json({
+            ok: false,
+            running: false,
+            message: `Порты ${PORTS.join(', ')} заняты другими приложениями — освободите один из них`,
+            chromePath,
+          })
+        }
         try {
-          const pid = launch(chromePath, dir, PORT)
-          const running = await waitForPort(PORT)
-          return json({ ok: true, running, pid, port: PORT, profileDir: dir, chromePath })
+          const pid = launch(chromePath, dir, freePort)
+          const running = await waitForPort(freePort)
+          return json({ ok: true, running, pid, port: freePort, profileDir: dir, chromePath })
         } catch (error) {
           return json({
             ok: false,
@@ -161,3 +213,4 @@ export function apply(ctx) {
     })
   }, 'dsh-browser-launcher: routes')
 }
+
