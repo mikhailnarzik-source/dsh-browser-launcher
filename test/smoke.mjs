@@ -171,8 +171,23 @@ if (headings.length !== 1) {
   process.exit(1)
 }
 const chips = findAll(pageTree, (node) => node.props?.['data-dsh-bl-chip'] === 'status')
-if (chips.length !== 1 || chips[0].props?.style?.borderRadius !== 999) {
-  console.error('FAIL: статус-чип не найден или не круглый')
+const chipStyle = chips[0]?.props?.style ?? {}
+if (
+  chips.length !== 1
+  || chipStyle.borderRadius !== 10
+  || chipStyle.height !== 32
+  || chipStyle.padding !== '0 12px'
+  || !String(chipStyle.border ?? '').startsWith('1px solid ')
+  || chipStyle.fontWeight !== 600
+  || chipStyle.fontSize !== 12.5
+  || chipStyle.gap !== 6
+) {
+  console.error('FAIL: статус-чип не в кнопочном стиле (radius 10, height 32, border, font 600 12.5)')
+  process.exit(1)
+}
+const chipDot = findAll(chips[0], (node) => node.props?.style?.width === 6 && node.props?.style?.height === 6)
+if (chipDot.length !== 1 || chipDot[0].props?.style?.background !== 'currentColor') {
+  console.error('FAIL: у статус-чипа нет точки-индикатора 6px')
   process.exit(1)
 }
 const refreshButtons = findAll(pageTree, (node) => node.type === 'button' && node.props?.style?.height === 32)

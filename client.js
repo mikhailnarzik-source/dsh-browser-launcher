@@ -145,8 +145,49 @@ window.__ModuleLoader__.load({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
       },
-      chip: { flex: 'none', fontSize: 11, lineHeight: 1.4, color: 'var(--dsw-alias-label-tertiary)' },
-      dot: (color) => ({ width: 6, height: 6, borderRadius: 999, background: color, display: 'inline-block', marginRight: 6 }),
+      chip: {
+        boxSizing: 'border-box',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        height: 32,
+        padding: '0 12px',
+        borderRadius: 10,
+        border: '1px solid color-mix(in srgb, var(--dsw-alias-brand-primary) 55%, transparent)',
+        background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 18%, transparent)',
+        color: 'var(--dsw-alias-brand-primary)',
+        fontSize: 12.5,
+        fontWeight: 600,
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+        flex: '0 0 auto',
+        minWidth: 0,
+        maxWidth: '100%',
+      },
+      chipTones: {
+        ok: {
+          border: '1px solid color-mix(in srgb, var(--dsw-alias-state-success-primary) 55%, transparent)',
+          background: 'color-mix(in srgb, var(--dsw-alias-state-success-primary) 16%, transparent)',
+          color: 'var(--dsw-alias-state-success-primary)',
+        },
+        warn: {
+          border: '1px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 55%, transparent)',
+          background: 'color-mix(in srgb, var(--dsw-alias-state-warn-primary) 16%, transparent)',
+          color: 'var(--dsw-alias-state-warn-primary)',
+        },
+        error: {
+          border: '1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 55%, transparent)',
+          background: 'color-mix(in srgb, var(--dsw-alias-state-error-primary) 16%, transparent)',
+          color: 'var(--dsw-alias-state-error-primary)',
+        },
+        muted: {
+          border: '1px solid var(--dsw-alias-border-l2)',
+          background: 'color-mix(in srgb, var(--dsw-alias-label-primary) 7%, transparent)',
+          color: 'var(--dsw-alias-label-secondary)',
+        },
+      },
+      dot: { boxSizing: 'border-box', width: 6, height: 6, borderRadius: '50%', background: 'currentColor', flex: 'none' },
 
       /* --- Страница плагина: единый стиль -------------------------------- */
       page: {
@@ -188,18 +229,6 @@ window.__ModuleLoader__.load({
         overflow: 'hidden',
       },
       actions: { marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' },
-      chipStatus: {
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        padding: '3px 9px',
-        borderRadius: 999,
-        fontSize: 12,
-        lineHeight: 1.4,
-        color: 'var(--dsw-alias-label-secondary)',
-        background: 'color-mix(in srgb, var(--dsw-alias-brand-primary) 10%, transparent)',
-        whiteSpace: 'nowrap',
-      },
       refresh: {
         boxSizing: 'border-box',
         display: 'inline-flex',
@@ -341,11 +370,12 @@ window.__ModuleLoader__.load({
       return t('idle')
     }
 
-    function phaseColor(phase) {
-      if (phase === 'running') return 'var(--dsw-alias-state-success-primary)'
-      if (phase === 'starting') return 'var(--dsw-alias-state-warn-primary)'
-      if (phase === 'failed') return 'var(--dsw-alias-state-error-primary)'
-      return 'var(--dsw-alias-label-tertiary)'
+    /** Тон статус-чипа по фазе: success/warn/error/muted. */
+    function phaseTone(phase) {
+      if (phase === 'running') return 'ok'
+      if (phase === 'starting') return 'warn'
+      if (phase === 'failed') return 'error'
+      return 'muted'
     }
 
     /** Карточка на странице «Старт»: клик по всей площади запускает браузер. */
@@ -379,8 +409,8 @@ window.__ModuleLoader__.load({
         ),
         h(
           'span',
-          { style: S.chip },
-          h('span', { style: S.dot(phaseColor(phase)) }),
+          { style: { ...S.chip, ...S.chipTones[phaseTone(phase)] }, 'data-dsh-bl-chip': 'state' },
+          h('span', { style: S.dot }),
           phaseLabel(phase, t),
         ),
       )
@@ -479,8 +509,8 @@ window.__ModuleLoader__.load({
             { style: S.actions, 'data-dsh-bl-actions': 'actions' },
             h(
               'span',
-              { style: S.chipStatus, 'data-dsh-bl-chip': 'status' },
-              h('span', { style: S.dot(phaseColor(phase)) }),
+              { style: { ...S.chip, ...S.chipTones[phaseTone(phase)] }, 'data-dsh-bl-chip': 'status', role: 'status' },
+              h('span', { style: S.dot }),
               phaseLabel(phase, t),
             ),
             h(

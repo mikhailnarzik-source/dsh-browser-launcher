@@ -260,6 +260,18 @@ test('страница плагина в «Плагинах» по-прежне�
   assert.equal(headers.length, 1, 'одна шапка')
   const chips = findAll(page, (node) => node?.props?.['data-dsh-bl-chip'] === 'status')
   assert.equal(chips.length, 1, 'статус-чип на месте')
+  const chipStyle = chips[0].props.style
+  assert.equal(chipStyle.display, 'inline-flex', 'чип собран на inline-flex')
+  assert.equal(chipStyle.borderRadius, 10, 'чип — не пилюля, а кнопка: radius 10')
+  assert.equal(chipStyle.height, 32, 'чип в шапке: height 32')
+  assert.equal(chipStyle.padding, '0 12px', 'padding чипа 0 12')
+  assert.match(String(chipStyle.border ?? ''), /^1px solid /, 'у чипа рамка 1px')
+  assert.equal(chipStyle.fontWeight, 600, 'шрифт чипа 600')
+  assert.equal(chipStyle.fontSize, 12.5, 'шрифт чипа 12.5')
+  assert.equal(chipStyle.gap, 6, 'gap чипа 6')
+  const chipDot = findAll(chips[0], (node) => node?.props?.style?.width === 6 && node?.props?.style?.height === 6)
+  assert.equal(chipDot.length, 1, 'точка-индикатор 6px у чипа')
+  assert.equal(chipDot[0].props.style.background, 'currentColor')
   const refresh = findAll(page, (node) => node?.props?.['data-dsh-bl-refresh'] === 'refresh')
   assert.equal(refresh.length, 1, 'кнопка «Проверить снова» на месте')
   assert.equal(
