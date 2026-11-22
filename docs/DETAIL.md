@@ -228,3 +228,12 @@ muted для «Не запущен». Ширина по тексту, подпи
 
 9222–9225: берётся первый свободный; если порт занят не-Chrome (DSH/Electron), он пропускается.
 
+
+## Прокрутка страниц
+
+Запуск браузера: корень `[data-dsh-bl-page]` (секция `plugins.detail.section`) и прокручиваемая оболочка main-панели `[data-dsh-bl-panel]` прокручивается по вертикали, если контент выше окна. Корень не имеет фиксированной высоты в px:
+`box-sizing:border-box; width:100%; min-height:0; max-height:100%; overflow-y:auto; overscroll-behavior:contain; padding-bottom` (+ `flex:1 1 auto` для flex-родителя), вложенные блоки с `max-height` прокручиваются внутри.
+
+Проверено headless на высотах окна 700/800 px и ширинах 1280/1024/768/480 px: страница докручивается до последнего элемента (`bottomReachable`), горизонтальной прокрутки страницы нет.
+
+Тест: `node --test test/scroll.test.mjs`.

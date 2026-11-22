@@ -200,6 +200,12 @@ window.__ModuleLoader__.load({
         flexDirection: 'column',
         gap: 16,
         color: 'inherit',
+        flex: '1 1 auto',
+        minHeight: 0,
+        maxHeight: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        overscrollBehavior: 'contain',
       },
       header: { display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' },
       logo: {
@@ -307,6 +313,7 @@ window.__ModuleLoader__.load({
 
     /** Адаптив и hover кнопок: то, что не выразить inline-стилями. */
     const PAGE_CSS =
+      '[data-dsh-bl-page]{box-sizing:border-box;width:100%;min-width:0;min-height:0;max-height:100%;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;padding-bottom:40px}' +
       '[data-dsh-bl-primary]:hover:not(:disabled){background:color-mix(in srgb, var(--dsw-alias-brand-primary) 28%, transparent) !important}' +
       '[data-dsh-bl-refresh]:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover) !important}' +
       '[data-dsh-bl-primary]:focus-visible,[data-dsh-bl-refresh]:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}' +
@@ -539,9 +546,12 @@ window.__ModuleLoader__.load({
     const PANEL_SCROLL = {
       flex: '1 1 auto',
       height: '100%',
+      width: '100%',
       minHeight: 0,
+      maxHeight: '100%',
       overflowY: 'auto',
       overflowX: 'hidden',
+      overscrollBehavior: 'contain',
       boxSizing: 'border-box',
       background: 'var(--dsw-alias-bg-base)',
       color: 'var(--dsw-alias-label-primary)',

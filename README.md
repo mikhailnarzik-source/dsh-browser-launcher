@@ -233,3 +233,12 @@ dsh plugin --profile desktop add github:mikhailnarzik-source/dsh-browser-launche
 
 Плагин использует первый свободный порт из 9222–9225. Если 9222 занят другим приложением (например, DSH с --remote-debugging-port), запуск идёт на 9223; статус проверяет, что на порту именно Chrome, а не Electron.
 
+
+## Прокрутка страниц
+
+Запуск браузера: корень `[data-dsh-bl-page]` (секция `plugins.detail.section`) и прокручиваемая оболочка main-панели `[data-dsh-bl-panel]` прокручивается по вертикали, если контент выше окна. Корень не имеет фиксированной высоты в px:
+`box-sizing:border-box; width:100%; min-height:0; max-height:100%; overflow-y:auto; overscroll-behavior:contain; padding-bottom` (+ `flex:1 1 auto` для flex-родителя), вложенные блоки с `max-height` прокручиваются внутри.
+
+Проверено headless на высотах окна 700/800 px и ширинах 1280/1024/768/480 px: страница докручивается до последнего элемента (`bottomReachable`), горизонтальной прокрутки страницы нет.
+
+Тест: `node --test test/scroll.test.mjs`.
