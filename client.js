@@ -747,7 +747,12 @@ window.__ModuleLoader__.load({
                 name: 'sidebar.panellist',
                 id: PANEL_ID,
                 order: PANEL_ORDER,
-                label: () => translate('type.label'),
+                label: () => {
+                  // Локаль может быть ещё не привязана в момент первого sync строки —
+                  // отдаём читаемое имя вместо технического ключа.
+                  const value = translate('type.label')
+                  return value === 'type.label' ? 'Браузер агента' : value
+                },
                 locale: NS,
               }, PanelIcon))
             } catch (error) {

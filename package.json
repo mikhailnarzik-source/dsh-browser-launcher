@@ -1,50 +1,52 @@
 {
-  "name": "dsh-browser-launcher",
-  "version": "1.0.9",
-  "type": "module",
-  "description": "Р С™Р Р…Р С•Р С—Р С”Р В° Р’В«Р вЂ”Р В°Р С—РЎС“РЎРѓРЎвЂљР С‘РЎвЂљРЎРЉ Р В±РЎР‚Р В°РЎС“Р В·Р ВµРЎР‚Р’В» Р Р…Р В° РЎРѓРЎвЂљР В°РЎР‚РЎвЂљР С•Р Р†Р С•Р в„– РЎРѓРЎвЂљРЎР‚Р В°Р Р…Р С‘РЎвЂ Р Вµ Р С—РЎР‚Р В°Р Р†Р С•Р в„– Р С—Р В°Р Р…Р ВµР В»Р С‘ DSH: Р С—Р С•Р Т‘Р Р…Р С‘Р СР В°Р ВµРЎвЂљ Chrome РЎРѓ Р С—РЎР‚Р С•РЎвЂћР С‘Р В»Р ВµР С Р В°Р С–Р ВµР Р…РЎвЂљР В° Р С‘ Р С—Р С•РЎР‚РЎвЂљР С•Р С Р С•РЎвЂљР В»Р В°Р Т‘Р С”Р С‘.",
-  "license": "MIT",
-  "keywords": [
-    "dsh",
-    "dsh-plugin",
-    "deepseek-harness",
-    "browser",
-    "chrome"
-  ],
-  "exports": {
-    ".": "./index.js",
-    "./client": "./client.js",
-    "./locale/*.json": "./locale/*.json",
-    "./icon": "./icon.svg"
-  },
-  "files": [
-    "index.js",
-    "client.js",
-    "cordis.patch.yml",
-    "locale",
-    "docs",
-    "icon.svg",
-    "README.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=22.15"
-  },
-  "scripts": {},
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web",
-      "immediately": true,
-      "inject": [
-        "@deepseek-ai/dsh-client-connection",
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-sidebar-right",
-        "@deepseek-ai/dsh-client-ui-slots"
-      ]
-    }
-  },
-  "icon": "./icon.svg"
+    "name":  "dsh-browser-launcher",
+    "version":  "1.0.10",
+    "type":  "module",
+    "description":  "Р В РЎв„ўР В Р вЂ¦Р В РЎвЂўР В РЎвЂ”Р В РЎвЂќР В Р’В° Р вЂ™Р’В«Р В РІР‚вЂќР В Р’В°Р В РЎвЂ”Р РЋРЎвЂњР РЋР С“Р РЋРІР‚С™Р В РЎвЂР РЋРІР‚С™Р РЋР Р‰ Р В Р’В±Р РЋР вЂљР В Р’В°Р РЋРЎвЂњР В Р’В·Р В Р’ВµР РЋР вЂљР вЂ™Р’В» Р В Р вЂ¦Р В Р’В° Р РЋР С“Р РЋРІР‚С™Р В Р’В°Р РЋР вЂљР РЋРІР‚С™Р В РЎвЂўР В Р вЂ Р В РЎвЂўР В РІвЂћвЂ“ Р РЋР С“Р РЋРІР‚С™Р РЋР вЂљР В Р’В°Р В Р вЂ¦Р В РЎвЂР РЋРІР‚В Р В Р’Вµ Р В РЎвЂ”Р РЋР вЂљР В Р’В°Р В Р вЂ Р В РЎвЂўР В РІвЂћвЂ“ Р В РЎвЂ”Р В Р’В°Р В Р вЂ¦Р В Р’ВµР В Р’В»Р В РЎвЂ DSH: Р В РЎвЂ”Р В РЎвЂўР В РўвЂР В Р вЂ¦Р В РЎвЂР В РЎВР В Р’В°Р В Р’ВµР РЋРІР‚С™ Chrome Р РЋР С“ Р В РЎвЂ”Р РЋР вЂљР В РЎвЂўР РЋРІР‚С›Р В РЎвЂР В Р’В»Р В Р’ВµР В РЎВ Р В Р’В°Р В РЎвЂ“Р В Р’ВµР В Р вЂ¦Р РЋРІР‚С™Р В Р’В° Р В РЎвЂ Р В РЎвЂ”Р В РЎвЂўР РЋР вЂљР РЋРІР‚С™Р В РЎвЂўР В РЎВ Р В РЎвЂўР РЋРІР‚С™Р В Р’В»Р В Р’В°Р В РўвЂР В РЎвЂќР В РЎвЂ.",
+    "license":  "MIT",
+    "keywords":  [
+                     "dsh",
+                     "dsh-plugin",
+                     "deepseek-harness",
+                     "browser",
+                     "chrome"
+                 ],
+    "exports":  {
+                    ".":  "./index.js",
+                    "./client":  "./client.js",
+                    "./locale/*.json":  "./locale/*.json",
+                    "./icon":  "./icon.svg"
+                },
+    "files":  [
+                  "index.js",
+                  "client.js",
+                  "cordis.patch.yml",
+                  "locale",
+                  "docs",
+                  "icon.svg",
+                  "README.md",
+                  "LICENSE"
+              ],
+    "engines":  {
+                    "node":  "\u003e=22.15"
+                },
+    "scripts":  {
+
+                },
+    "dsh":  {
+                "bundle":  {
+                               "patch":  "./cordis.patch.yml"
+                           },
+                "client":  {
+                               "platform":  "web",
+                               "immediately":  true,
+                               "inject":  [
+                                              "@deepseek-ai/dsh-client-connection",
+                                              "@deepseek-ai/dsh-client-locale",
+                                              "@deepseek-ai/dsh-client-ui-sidebar-right",
+                                              "@deepseek-ai/dsh-client-ui-slots"
+                                          ]
+                           }
+            },
+    "icon":  "./icon.svg"
 }
