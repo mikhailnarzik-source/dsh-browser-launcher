@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Вертикальный скролл страницы плагина «Запуск браузера» (страница настроек запуска Chrome).
  *
  * Требование: если контент выше окна, страница не обрезается. Корень —
@@ -22,7 +22,7 @@ const PACKAGE = JSON.parse(await readFile(new URL('../package.json', import.meta
 
 const PLUGIN = "dsh-browser-launcher"
 const PACKAGE_NAME = PACKAGE.name
-const VERSION = "1.0.9"
+const VERSION = "1.0.10"
 const ROOT_SELECTOR = "[data-dsh-bl-page]"
 const ARCH = "root"
 const HAS_DETAIL = true
@@ -371,3 +371,4 @@ test('версия плагина поднята на +0.0.1', () => {
   assert.match(PACKAGE.version, /^\d+\.\d+\.\d+$/)
   assert.equal(PACKAGE.version, VERSION)
 })
+
